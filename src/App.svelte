@@ -7,9 +7,9 @@
     SimplePool,
     type Event,
     type UnsignedEvent,
-    type Sub,
   } from "nostr-tools";
   import { onMount } from 'svelte';
+  import { getRandomBase64Url } from './lib/randomBase64Url';
 
   // nip07 types
   interface Window {
@@ -20,8 +20,8 @@
   }
 
   // constants
-  const tagKey = 's';
-  const appKind = 30078
+  const tagKey: string = 's';
+  const appKind: number = 30078
 
   // form value
   let nip5 = null;
@@ -48,6 +48,11 @@
     const hash = window.location.hash;
     console.info(hash)
     if(!hash) {
+      setTimeout(() => {
+        if(!(window as Window).nostr) {
+          result = 'Set NIP-7 please!!!'
+        }
+      }, 3000);
       return;
     }
 
@@ -77,7 +82,7 @@
       {
         kinds: [appKind],
         authors: [yourPubKey],
-        [`#${tagKey}`]: [contentId],
+        [`#${tagKey}` as any]: [contentId],
       },
     ]);
 
@@ -86,15 +91,13 @@
 
       console.info(`redirect URL: ${redirectUrl}`);
       window.location.href = redirectUrl;
-      pool.close(relays);
       sub.close();
+      pool.close(relays);
     });
 
   });
 
   async function onclick() {
-    console.info('submit');
-
     if(!(window as Window).nostr) {
       result = 'Set NIP-7 please!!!'
       throw new Error(result);
@@ -103,8 +106,11 @@
     // Generate key
     const pk = await (window as Window).nostr.getPublicKey()
 
-    // FIXME: Sorry very bad implementation. Only prototype.
-    const contentId = Math.floor(Math.random() * 100000).toString();
+    // Generate content id as random value
+    const contentId = getRandomBase64Url(3);
+    console.log(`ContentID: ${contentId}`);
+
+    // TODO: check content id duplication
 
     /**
      * Prepare event.
@@ -149,7 +155,7 @@
   </Fab>
   <div class="top-space" />
   <div class="input-flex-container">
-    <div class="card-container"><Card padded>{result}</Card></div>
+    <div class="card-container message"><Card padded>{result}</Card></div>
   </div>
 
   <!-- NIP-5 input -->
@@ -159,7 +165,7 @@
         type="text"
         variant="outlined"
         bind:value={nip5}
-        label="Your nip-05 domain"
+        label="Your NIP-5 domain"
         class="text-input"
         disabled={disabledInput}
       />
@@ -173,7 +179,7 @@
         type="text"
         variant="outlined"
         bind:value={nip5Name}
-        label='Your nip-05 "name"'
+        label='Your NIP-5 "name"'
         class="text-input"
         disabled={disabledInput}
       />
@@ -186,7 +192,7 @@
         type="text"
         variant="outlined"
         bind:value={inputUrl}
-        label="long url"
+        label="Input your long url"
         class="text-input"
         disabled={disabledInput}
       />
