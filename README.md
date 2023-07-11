@@ -52,3 +52,7 @@ TBD
 ## Test
 
 `yarn dev`
+
+## License
+
+[MIT License](./LICENSE.md)
