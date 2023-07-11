@@ -147,10 +147,10 @@
   href="https://cdn.jsdelivr.net/npm/svelte-material-ui@6.0.0/bare.min.css"
 />
 <main>
-  <Fab extended style="height: 34px;font-size: 0.6em;width: auto;">
+  <Fab extended style="height: 40px;font-size: 0.8em;width: auto;">
     <Icon class="material-icons" style="margin-right: 4px;">link</Icon>
     <Label
-      >Short Link</Label
+      >NIP-5 Short URL</Label
     >
   </Fab>
   <div class="top-space" />
@@ -203,6 +203,12 @@
   <p>
    NIP-5:{nip5 ?? " ???"}
   </p>
+  <div class="footer">
+    <a href="https://github.com/ocknamo/shotr/issues" target="_blank" rel="noopener noreferrer"><p>Report</p></a>
+    <a href="https://github.com/ocknamo/shotr" target="_blank" rel="noopener noreferrer">
+      <img width="50em" src="src/assets/github-mark.svg" alt="github"/>
+    </a>
+  </div>
 </main>
 
 <style>
@@ -238,5 +244,17 @@
     overflow: hidden;
     text-overflow: ellipsis;
     max-width: 300px;
+  }
+  .footer {
+    position: absolute;
+    bottom: 1em;
+    right: 1em;
+    display: flex;
+    justify-content: end;
+    vertical-align: bottom;
+    width: 100%;
+  }
+  .footer a {
+    margin-left: 1em;
   }
 </style>
