@@ -29,6 +29,6 @@
     "webdriverio": "^8.12.1"
   },
   "dependencies": {
-    "nostr-tools": "^1.12.1"
+    "nostr-tools": "1.12.0"
   }
 }
