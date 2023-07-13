@@ -139,6 +139,7 @@
     pool.publish(relays, event!);
 
     const baseUrl = window.location.href
+    // TODO: Convert safety NIP-05 name and nip5 domain. eg. `/`, `@` value are not safety.
     result = `${baseUrl}#${nip5Name}@${nip5}/${tagKey}/${contentId}`;
 
     // cooling time
