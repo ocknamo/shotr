@@ -9,7 +9,8 @@
     type UnsignedEvent,
   } from "nostr-tools";
   import { onMount } from 'svelte';
-  import { getRandomBase64Url } from './lib/randomBase64Url';
+  import { detectUniqContentId } from './lib/detect-uniq-content-id';
+  import githubLogo from './lib/github-mark.svg';
 
   // nip07 types
   interface Window {
@@ -24,9 +25,9 @@
   const appKind: number = 30078
 
   // form value
-  let nip5 = null;
-  let nip5Name = null;
-  let inputUrl = null;
+  let nip5: string | null = null;
+  let nip5Name: string | null = null;
+  let inputUrl: string | null = null;
 
   // interaction state
   $: disabled = !nip5 || !nip5Name || !inputUrl;
@@ -37,11 +38,14 @@
 
   // Setup relay
   const pool = new SimplePool();
+
+  // TODO: Add relay from NIP-07
   let relays = [
     "wss://relay.damus.io",
     "wss://relay-jp.nostr.wirednet.jp",
     "wss://nos.lol",
     "wss://yabu.me",
+    "wss://relay.snort.social",
   ];
 
   onMount(async () => {
@@ -94,7 +98,6 @@
       sub.close();
       pool.close(relays);
     });
-
   });
 
   async function onclick() {
@@ -104,13 +107,22 @@
     }
 
     // Generate key
-    const pk = await (window as Window).nostr.getPublicKey()
+    const pk = await (window as Window).nostr?.getPublicKey()
+    if(!pk) {
+      throw new Error('Invalid publickey');
+    }
 
     // Generate content id as random value
-    const contentId = getRandomBase64Url(3);
+    // check content id duplication
+    const contentId = await detectUniqContentId(3, {
+      pool,
+      relays,
+      appKind,
+      yourPubkey: pk,
+      tagKey,
+      timeoutSec: 3,
+    })
     console.log(`ContentID: ${contentId}`);
-
-    // TODO: check content id duplication
 
     /**
      * Prepare event.
@@ -119,12 +131,12 @@
       kind: appKind,
       created_at: Math.floor(Date.now() / 1000),
       tags: [[tagKey, contentId]],
-      content: inputUrl,
-      pubkey: pk,
+      content: inputUrl!,
+      pubkey: pk ?? '',
     };
 
-    const event = await (window as Window).nostr.signEvent(unsignedEvent)
-    pool.publish(relays, event);
+    const event = await (window as Window).nostr?.signEvent(unsignedEvent)
+    pool.publish(relays, event!);
 
     const baseUrl = window.location.href
     result = `${baseUrl}#${nip5Name}@${nip5}/${tagKey}/${contentId}`;
@@ -206,7 +218,7 @@
   <div class="footer">
     <a href="https://github.com/ocknamo/shotr/issues" target="_blank" rel="noopener noreferrer"><p>Report</p></a>
     <a href="https://github.com/ocknamo/shotr" target="_blank" rel="noopener noreferrer">
-      <img width="50em" src="src/assets/github-mark.svg" alt="github"/>
+      <img width="50em" src="{githubLogo}" alt="github"/>
     </a>
   </div>
 </main>
