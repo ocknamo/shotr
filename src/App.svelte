@@ -1,5 +1,6 @@
 <script lang="ts">
   import Button from "@smui/button";
+  import IconButton from "@smui/icon-button";
   import Textfield from "@smui/textfield";
   import Card from "@smui/card";
   import Fab, { Icon, Label } from "@smui/fab";
@@ -12,6 +13,7 @@
   import { detectUniqContentId } from './lib/detect-uniq-content-id';
   import githubLogo from './lib/github-mark.svg';
   import { name } from '../package.json'
+  import { isValidUrl } from './lib/isValidUrl'
 
   // nip07 types
   interface Window {
@@ -35,6 +37,7 @@
   // interaction state
   $: disabled = !nip5 || !nip5Name || !inputUrl;
   let disabledInput = false;
+  $: showCopyButton = !!window.navigator.clipboard.writeText && isValidUrl(result);
 
   // result initial value
   let result = "...waiting your input";
@@ -155,6 +158,10 @@
       pool.close(relays);
     }, 5000);
   }
+
+  async function copyUrl() {
+    window.navigator.clipboard.writeText(result);
+  }
 </script>
 
 <link
@@ -176,7 +183,13 @@
   <p class="app-description">Shorted URL generator by NIP-05 </p>
   <div class="top-space" />
   <div class="input-flex-container">
-    <div class="card-container"><Card padded class="card-message">{result}</Card></div>
+    <div class="card-container">
+      <Card padded class="card-message">{result}</Card>
+      {#if showCopyButton}
+      <IconButton class="material-icons" style="margin-left: 0.4em;color:rgb(1, 135, 134)" on:click={copyUrl} >content_copy</IconButton>
+      {/if}
+  </div>
+
   </div>
 
   <!-- NIP-5 input -->
@@ -253,6 +266,8 @@
     min-width: 200px;
     max-width: 300px;
     color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
   }
   .input-flex-container {
     display: flex;

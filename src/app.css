@@ -5,7 +5,6 @@
 
   color-scheme: light dark;
   color: rgba(255, 255, 255, 0.87);
-  /* background-color: rgba(255, 255, 255, 0.87); */
   background-color: rgb(214, 248, 227) !important;
 
   font-synthesis: none;
@@ -48,6 +47,7 @@ input {
   overflow: hidden;
   text-overflow: ellipsis;
   display: block !important;
+  min-width: 300px;
 }
 
 .text-input {
