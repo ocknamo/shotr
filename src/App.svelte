@@ -11,6 +11,7 @@
   import { onMount } from 'svelte';
   import { detectUniqContentId } from './lib/detect-uniq-content-id';
   import githubLogo from './lib/github-mark.svg';
+  import { name } from '../package.json'
 
   // nip07 types
   interface Window {
@@ -23,6 +24,8 @@
   // constants
   const tagKey: string = 's';
   const appKind: number = 30078
+  const dTag = 'd';
+  const appName = name;
 
   // form value
   let nip5: string | null = null;
@@ -130,7 +133,10 @@
     const unsignedEvent: UnsignedEvent = {
       kind: appKind,
       created_at: Math.floor(Date.now() / 1000),
-      tags: [[tagKey, contentId]],
+      tags: [
+        [tagKey, contentId],
+        [dTag, appName],
+      ],
       content: inputUrl!,
       pubkey: pk ?? '',
     };
@@ -164,7 +170,7 @@
   <Fab extended class="fab-title">
     <Icon class="material-icons" style="margin-right: 4px;">link</Icon>
     <Label
-      >Shotr</Label
+      >{appName}</Label
     >
   </Fab>
   <p class="app-description">Shorted URL generator by NIP-05 </p>
