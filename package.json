@@ -1,7 +1,7 @@
 {
   "name": "shotr",
   "private": true,
-  "version": "0.1.2",
+  "version": "0.1.3",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -15,6 +15,7 @@
     "@smui/button": "^7.0.0-beta.14",
     "@smui/card": "^7.0.0-beta.14",
     "@smui/fab": "^7.0.0-beta.14",
+    "@smui/icon-button": "^7.0.0-beta.14",
     "@smui/textfield": "^7.0.0-beta.14",
     "@sveltejs/vite-plugin-svelte": "^2.4.2",
     "@tsconfig/svelte": "^5.0.0",
