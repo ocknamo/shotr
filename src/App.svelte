@@ -108,6 +108,7 @@
       result = 'Set NIP-7 please!!!'
       throw new Error(result);
     }
+    disabled = true;
 
     // Generate key
     const pk = await (window as Window).nostr?.getPublicKey()
@@ -151,7 +152,6 @@
     // cooling time
     // FIXME: We can request when update input.
     setTimeout(() => {
-      disabled = false;
       pool.close(relays);
     }, 5000);
   }
