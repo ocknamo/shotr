@@ -54,7 +54,7 @@
     if(!hash) {
       setTimeout(() => {
         if(!(window as Window).nostr) {
-          result = 'Set NIP-7 please!!!'
+          result = 'Set NIP-7 please!'
         }
       }, 3000);
       return;
@@ -160,15 +160,17 @@
   href="https://cdn.jsdelivr.net/npm/svelte-material-ui@6.0.0/bare.min.css"
 />
 <main>
-  <Fab extended style="height: 40px;font-size: 0.8em;width: auto;">
+  <div class="head-space" />
+  <Fab extended class="fab-title">
     <Icon class="material-icons" style="margin-right: 4px;">link</Icon>
     <Label
-      >NIP-5 Short URL</Label
+      >Shotr</Label
     >
   </Fab>
+  <p class="app-description">Shorted URL generator by NIP-05 </p>
   <div class="top-space" />
   <div class="input-flex-container">
-    <div class="card-container message"><Card padded>{result}</Card></div>
+    <div class="card-container"><Card padded class="card-message">{result}</Card></div>
   </div>
 
   <!-- NIP-5 input -->
@@ -212,7 +214,7 @@
     </div>
   </div>
 
-  <Button variant="raised" on:click={onclick} {disabled}>Submit</Button>
+  <Button style="margin:8px;" variant="raised" on:click={onclick} {disabled}>Submit</Button>
   <p>
    NIP-5:{nip5 ?? " ???"}
   </p>
@@ -225,19 +227,25 @@
 </main>
 
 <style>
+  .head-space {
+    margin-top: 6em;
+  }
   .top-space {
-    margin-top: 8em;
+    margin-top: 4em;
   }
   @media screen and (max-height: 740px) {
     .top-space {
-      margin-top: 2em;
+      margin-top: 0.5em;
+    }
+    .head-space {
+      margin-top: 0em;
     }
   }
   .card-container {
     margin: 4em;
     width: 100%;
     min-width: 200px;
-    max-width: 600px;
+    max-width: 300px;
     color: rgba(0, 0, 0, 0.5);
   }
   .input-flex-container {
@@ -247,16 +255,16 @@
     width: 100%;
     overflow-wrap: break-word;
   }
+  .app-description {
+    color: rgba(0, 0, 0, 0.8);
+    font-size: 1.2em;
+    font-family:"'Times New Roman', Times, serif";
+    margin: 0.8em 0 0 0;
+  }
   .text-input-container {
     margin: 0.5em;
     max-width: fit-content;
     min-width: 200px;
-  }
-  .message {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 300px;
   }
   .footer {
     position: absolute;
