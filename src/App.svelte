@@ -14,6 +14,7 @@
   import githubLogo from './lib/github-mark.svg';
   import { name } from '../package.json'
   import { isValidUrl } from './lib/isValidUrl'
+  import { fetchNip5json } from './lib/fetchNip5json';
 
   // nip07 types
   interface Window {
@@ -82,9 +83,28 @@
       throw new Error(result);
     }
 
+    // FIXME
+    // Validation
     // fetch nip5 pub
-    const nip5Json: {names: {[key: string]: string}} = await (await fetch(`https://${nip5}/.well-known/nostr.json`)).json();
+    const nip5Json = await fetchNip5json(nip5);
+    if(!nip5Json || !nip5Json['names']) {
+      alert(`NIP-5: ${nip5}\nNIP5 not found. \nNIP-5がありません`);
+      setTimeout(() => {
+        window.location.href = window.location.origin;
+      }, 100);
+
+      return;
+    }
     const yourPubKey = nip5Json['names'][nip5Name];
+    // eg. http://localhost:5173/#ocknam@ocknamo.com/s/coY
+    if(!yourPubKey) {
+      alert(`name: ${nip5Name}\nPublic key not found. \n有効な公開鍵がありません`);
+      setTimeout(() => {
+        window.location.href = window.location.origin;
+      }, 100);
+
+      return;
+    }
     console.info(`pubkey: ${yourPubKey}`);
 
     // fetch event.
@@ -117,6 +137,38 @@
     const pk = await (window as Window).nostr?.getPublicKey()
     if(!pk) {
       throw new Error('Invalid publickey');
+    }
+
+    // FIXME
+    // Validation
+    // fetch nip5 pub
+    const nip5Json = await fetchNip5json(nip5);
+    if(!nip5Json || !nip5Json['names']) {
+      alert(`NIP-5: ${nip5}\nNIP5 not found. \nNIP-5がありません`);
+      setTimeout(() => {
+        window.location.href = window.location.origin;
+      }, 100);
+
+      return;
+    }
+    const yourPubKey = nip5Json['names'][nip5Name];
+    // eg. http://localhost:5173/#ocknam@ocknamo.com/s/coY
+    if(!yourPubKey) {
+      alert(`name: ${nip5Name}\nPublic key not found. \n有効な公開鍵がありません`);
+      setTimeout(() => {
+        window.location.href = window.location.origin;
+      }, 100);
+
+      return;
+    }
+
+    if(yourPubKey !== pk) {
+      alert(`name: ${nip5Name}\nThe public key is different from NIP-7.. \n公開鍵がNIP-7と異なります`);
+      setTimeout(() => {
+        window.location.href = window.location.origin;
+      }, 100);
+
+      return;
     }
 
     // Generate content id as random value
