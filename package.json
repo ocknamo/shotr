@@ -9,6 +9,7 @@
     "preview": "vite preview",
     "check": "svelte-check --tsconfig ./tsconfig.json",
     "format": "npx prettier --write .",
+    "ci:format": "npx prettier --check .",
     "test": "vitest run"
   },
   "devDependencies": {
