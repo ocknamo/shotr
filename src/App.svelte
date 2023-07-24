@@ -29,6 +29,7 @@
   const appKind: number = 30078
   const dTag = 'd';
   const appName = name;
+  const baseUrl = window.location.origin;
 
   // form value
   let nip5: string | null = null;
@@ -89,9 +90,6 @@
     const nip5Json = await fetchNip5json(nip5);
     if(!nip5Json || !nip5Json['names']) {
       alert(`NIP-5: ${nip5}\nNIP5 not found. \nNIP-5がありません`);
-      setTimeout(() => {
-        window.location.href = window.location.origin;
-      }, 100);
 
       return;
     }
@@ -99,9 +97,6 @@
     // eg. http://localhost:5173/#ocknam@ocknamo.com/s/coY
     if(!yourPubKey) {
       alert(`name: ${nip5Name}\nPublic key not found. \n有効な公開鍵がありません`);
-      setTimeout(() => {
-        window.location.href = window.location.origin;
-      }, 100);
 
       return;
     }
@@ -145,9 +140,6 @@
     const nip5Json = await fetchNip5json(nip5);
     if(!nip5Json || !nip5Json['names']) {
       alert(`NIP-5: ${nip5}\nNIP5 not found. \nNIP-5がありません`);
-      setTimeout(() => {
-        window.location.href = window.location.origin;
-      }, 100);
 
       return;
     }
@@ -155,18 +147,12 @@
     // eg. http://localhost:5173/#ocknam@ocknamo.com/s/coY
     if(!yourPubKey) {
       alert(`name: ${nip5Name}\nPublic key not found. \n有効な公開鍵がありません`);
-      setTimeout(() => {
-        window.location.href = window.location.origin;
-      }, 100);
 
       return;
     }
 
     if(yourPubKey !== pk) {
       alert(`name: ${nip5Name}\nThe public key is different from NIP-7.. \n公開鍵がNIP-7と異なります`);
-      setTimeout(() => {
-        window.location.href = window.location.origin;
-      }, 100);
 
       return;
     }
@@ -198,9 +184,8 @@
     };
 
     const event = await (window as Window).nostr?.signEvent(unsignedEvent)
-    pool.publish(relays, event!);
+    pool.publish(relays, event!)
 
-    const baseUrl = window.location.href
     // TODO: Convert safety NIP-05 name and nip5 domain. eg. `/`, `@` value are not safety.
     result = `${baseUrl}#${nip5Name}@${nip5}/${tagKey}/${contentId}`;
 
@@ -209,6 +194,10 @@
     setTimeout(() => {
       pool.close(relays);
     }, 5000);
+  }
+
+  function clickTitle() {
+    window.location.href = baseUrl;
   }
 
   async function copyUrl() {
@@ -226,7 +215,7 @@
 />
 <main>
   <div class="head-space" />
-  <Fab extended class="fab-title">
+  <Fab extended class="fab-title" on:click={clickTitle}>
     <Icon class="material-icons" style="margin-right: 4px;">link</Icon>
     <Label
       >{appName}</Label
