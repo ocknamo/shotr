@@ -1,20 +1,18 @@
 <script lang="ts">
-  import Button from "@smui/button";
-  import IconButton from "@smui/icon-button";
-  import Textfield from "@smui/textfield";
-  import Card from "@smui/card";
-  import Fab, { Icon, Label } from "@smui/fab";
-  import {
-    SimplePool,
-    type Event,
-    type UnsignedEvent,
-  } from "nostr-tools";
+  import Button from '@smui/button';
+  import IconButton from '@smui/icon-button';
+  import Textfield from '@smui/textfield';
+  import Card from '@smui/card';
+  import Fab, { Icon, Label } from '@smui/fab';
+  import { SimplePool, type Event, type UnsignedEvent } from 'nostr-tools';
   import { onMount } from 'svelte';
   import { detectUniqContentId } from './lib/detect-uniq-content-id';
   import githubLogo from './lib/github-mark.svg';
-  import { name } from '../package.json'
-  import { isValidUrl } from './lib/isValidUrl'
+  import { name } from '../package.json';
+  import { isValidUrl } from './lib/isValidUrl';
   import { fetchNip5json } from './lib/fetchNip5json';
+  import RedirectingDialog from './lib/component/RedirectingDialog.svelte';
+  import { sleep } from './lib/sleep';
 
   // nip07 types
   interface Window {
@@ -26,7 +24,7 @@
 
   // constants
   const tagKey: string = 's';
-  const appKind: number = 30078
+  const appKind: number = 30078;
   const dTag = 'd';
   const appName = name;
   const baseUrl = window.location.origin;
@@ -39,37 +37,37 @@
   // interaction state
   $: disabled = !nip5 || !nip5Name || !inputUrl;
   let disabledInput = false;
-  $: showCopyButton = !!window.navigator.clipboard.writeText && isValidUrl(result);
+  $: showCopyButton =
+    !!window.navigator.clipboard.writeText && isValidUrl(result);
+  let redirect = false;
+  let redirectCancel = false;
 
   // result initial value
-  let result = "...waiting your input";
+  let result = '...waiting your input';
 
   // Setup relay
   const pool = new SimplePool();
 
   // TODO: Add relay from NIP-07
   let relays = [
-    "wss://relay.damus.io",
-    "wss://relay-jp.nostr.wirednet.jp",
-    "wss://nos.lol",
-    "wss://yabu.me",
-    "wss://relay.snort.social",
+    'wss://relay.damus.io',
+    'wss://relay-jp.nostr.wirednet.jp',
+    'wss://nos.lol',
+    'wss://yabu.me',
+    'wss://relay.snort.social',
   ];
 
   onMount(async () => {
     const hash = window.location.hash;
-    console.info(hash)
-    if(!hash) {
+    console.info(hash);
+    if (!hash) {
       setTimeout(() => {
-        if(!(window as Window).nostr) {
-          result = 'Set NIP-7 please!'
+        if (!(window as Window).nostr) {
+          result = 'Set NIP-7 please!';
         }
       }, 3000);
       return;
     }
-
-    result = 'Redirecting...';
-    disabledInput = true;
 
     // parse
     const splitted = hash.replace('#', '').split('/');
@@ -79,24 +77,31 @@
     const tag = splitted[1];
     const contentId = splitted[2];
 
-    if(!nip5 || !tag || !contentId) {
-      result = 'Something wrong. I see this is invalid url.'
+    if (!nip5 || !tag || !contentId) {
+      result = 'Something wrong. I see this is invalid url.';
       throw new Error(result);
     }
 
-    // FIXME
+    result = 'Redirecting...';
+    redirect = true;
+    disabledInput = true;
+
     // Validation
     // fetch nip5 pub
     const nip5Json = await fetchNip5json(nip5);
-    if(!nip5Json || !nip5Json['names']) {
+    if (!nip5Json || !nip5Json['names']) {
       alert(`NIP-5: ${nip5}\nNIP5 not found. \nNIP-5がありません`);
+      reset();
 
       return;
     }
     const yourPubKey = nip5Json['names'][nip5Name];
     // eg. http://localhost:5173/#ocknam@ocknamo.com/s/coY
-    if(!yourPubKey) {
-      alert(`name: ${nip5Name}\nPublic key not found. \n有効な公開鍵がありません`);
+    if (!yourPubKey) {
+      alert(
+        `name: ${nip5Name}\nPublic key not found. \n有効な公開鍵がありません`,
+      );
+      reset();
 
       return;
     }
@@ -111,10 +116,22 @@
       },
     ]);
 
-    sub.on("event", (event) => {
+    sub.on('event', async (event) => {
       const redirectUrl = event.content;
+      inputUrl = redirectUrl;
 
       console.info(`redirect URL: ${redirectUrl}`);
+
+      // Wait cancel action.
+      await sleep(3000);
+
+      if (redirectCancel) {
+        reset();
+        sub.close();
+        pool.close(relays);
+
+        return;
+      }
       window.location.href = redirectUrl;
       sub.close();
       pool.close(relays);
@@ -122,37 +139,46 @@
   });
 
   async function onclick() {
-    if(!(window as Window).nostr) {
-      result = 'Set NIP-7 please!!!'
+    if (!(window as Window).nostr) {
+      result = 'Set NIP-7 please!!!';
       throw new Error(result);
     }
     disabled = true;
 
     // Generate key
-    const pk = await (window as Window).nostr?.getPublicKey()
-    if(!pk) {
+    const pk = await (window as Window).nostr?.getPublicKey();
+    if (!pk) {
       throw new Error('Invalid publickey');
     }
 
-    // FIXME
     // Validation
+    if (!nip5 || !nip5Name || !inputUrl) {
+      return;
+    }
     // fetch nip5 pub
     const nip5Json = await fetchNip5json(nip5);
-    if(!nip5Json || !nip5Json['names']) {
+    if (!nip5Json || !nip5Json['names']) {
       alert(`NIP-5: ${nip5}\nNIP5 not found. \nNIP-5がありません`);
+      reset();
 
       return;
     }
     const yourPubKey = nip5Json['names'][nip5Name];
     // eg. http://localhost:5173/#ocknam@ocknamo.com/s/coY
-    if(!yourPubKey) {
-      alert(`name: ${nip5Name}\nPublic key not found. \n有効な公開鍵がありません`);
+    if (!yourPubKey) {
+      alert(
+        `name: ${nip5Name}\nPublic key not found. \n有効な公開鍵がありません`,
+      );
+      reset();
 
       return;
     }
 
-    if(yourPubKey !== pk) {
-      alert(`name: ${nip5Name}\nThe public key is different from NIP-7.. \n公開鍵がNIP-7と異なります`);
+    if (yourPubKey !== pk) {
+      alert(
+        `name: ${nip5Name}\nThe public key is different from NIP-7.. \n公開鍵がNIP-7と異なります`,
+      );
+      reset();
 
       return;
     }
@@ -166,7 +192,7 @@
       yourPubkey: pk,
       tagKey,
       timeoutSec: 3,
-    })
+    });
     console.log(`ContentID: ${contentId}`);
 
     /**
@@ -183,14 +209,13 @@
       pubkey: pk ?? '',
     };
 
-    const event = await (window as Window).nostr?.signEvent(unsignedEvent)
-    pool.publish(relays, event!)
+    const event = await (window as Window).nostr?.signEvent(unsignedEvent);
+    pool.publish(relays, event!);
 
     // TODO: Convert safety NIP-05 name and nip5 domain. eg. `/`, `@` value are not safety.
     result = `${baseUrl}#${nip5Name}@${nip5}/${tagKey}/${contentId}`;
 
     // cooling time
-    // FIXME: We can request when update input.
     setTimeout(() => {
       pool.close(relays);
     }, 5000);
@@ -202,6 +227,14 @@
 
   async function copyUrl() {
     window.navigator.clipboard.writeText(result);
+  }
+
+  function reset() {
+    window.history.pushState('', 'top page', baseUrl);
+    disabledInput = false;
+    redirect = false;
+    redirectCancel = false;
+    result = '...waiting your input';
   }
 </script>
 
@@ -217,20 +250,21 @@
   <div class="head-space" />
   <Fab extended class="fab-title" on:click={clickTitle}>
     <Icon class="material-icons" style="margin-right: 4px;">link</Icon>
-    <Label
-      >{appName}</Label
-    >
+    <Label>{appName}</Label>
   </Fab>
-  <p class="app-description">Shorted URL generator by NIP-05 </p>
+  <p class="app-description">Shorted URL generator by NIP-05</p>
   <div class="top-space" />
   <div class="input-flex-container">
     <div class="card-container">
       <Card padded class="card-message">{result}</Card>
       {#if showCopyButton}
-      <IconButton class="material-icons" style="margin-left: 0.4em;color:rgb(1, 135, 134)" on:click={copyUrl} >content_copy</IconButton>
+        <IconButton
+          class="material-icons"
+          style="margin-left: 0.4em;color:rgb(1, 135, 134)"
+          on:click={copyUrl}>content_copy</IconButton
+        >
       {/if}
-  </div>
-
+    </div>
   </div>
 
   <!-- NIP-5 input -->
@@ -247,14 +281,14 @@
     </div>
   </div>
 
-    <!-- NIP-5 name input -->
+  <!-- NIP-5 name input -->
   <div class="input-flex-container">
     <div class="text-input-container">
       <Textfield
         type="text"
         variant="outlined"
         bind:value={nip5Name}
-        label='Your NIP-5 "name"'
+        label="Your NIP-5 'name'"
         class="text-input"
         disabled={disabledInput}
       />
@@ -274,16 +308,35 @@
     </div>
   </div>
 
-  <Button style="margin:8px;" variant="raised" on:click={onclick} {disabled}>Submit</Button>
+  <Button style="margin:8px;" variant="raised" on:click={onclick} {disabled}
+    >Submit</Button
+  >
   <p>
-   NIP-5:{nip5 ?? " ???"}
+    NIP-5:{nip5 ?? ' ???'}
   </p>
   <div class="footer">
-    <a href="https://github.com/ocknamo/shotr/issues" target="_blank" rel="noopener noreferrer"><p>Report</p></a>
-    <a href="https://github.com/ocknamo/shotr" target="_blank" rel="noopener noreferrer">
-      <img width="50em" src="{githubLogo}" alt="github"/>
+    <a
+      href="https://github.com/ocknamo/shotr/issues"
+      target="_blank"
+      rel="noopener noreferrer"><p>Report</p></a
+    >
+    <a
+      href="https://github.com/ocknamo/shotr"
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      <img width="50em" src={githubLogo} alt="github" />
     </a>
   </div>
+
+  {#if redirect}
+    <RedirectingDialog
+      bind:canceled={redirectCancel}
+      bind:nip5
+      bind:nip5Name
+      bind:redirectUrl={inputUrl}
+    ></RedirectingDialog>
+  {/if}
 </main>
 
 <style>
@@ -320,7 +373,7 @@
   .app-description {
     color: rgba(0, 0, 0, 0.8);
     font-size: 1.2em;
-    font-family:"'Times New Roman', Times, serif";
+    font-family: "'Times New Roman', Times, serif";
     margin: 0.8em 0 0 0;
   }
   .text-input-container {

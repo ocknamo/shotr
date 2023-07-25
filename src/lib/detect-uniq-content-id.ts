@@ -1,8 +1,8 @@
 import {
   fetchApplicationEvent,
   type FetchConfig,
-} from "./fetch-application-event";
-import { getRandomBase64Url } from "./randomBase64Url";
+} from './fetch-application-event';
+import { getRandomBase64Url } from './randomBase64Url';
 
 export async function detectUniqContentId(
   digits: number,

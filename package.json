@@ -1,7 +1,7 @@
 {
   "name": "shotr",
   "private": true,
-  "version": "0.1.5",
+  "version": "0.1.6",
   "type": "module",
   "engines": {
     "node": ">=20"
@@ -11,14 +11,17 @@
     "build": "vite build",
     "preview": "vite preview",
     "check": "svelte-check --tsconfig ./tsconfig.json",
-    "format": "npx prettier --write .",
-    "ci:format": "npx prettier --check .",
+    "format": "npx prettier --write --plugin prettier-plugin-svelte .",
+    "ci:format": "npx prettier --check --plugin prettier-plugin-svelte .",
     "test": "vitest run",
-    "ci:test": "vitest run --coverage"
+    "ci:test": "vitest run --coverage",
+    "prettier": "prettier"
   },
   "devDependencies": {
     "@smui/button": "^7.0.0-beta.14",
     "@smui/card": "^7.0.0-beta.14",
+    "@smui/circular-progress": "^7.0.0-beta.14",
+    "@smui/dialog": "^7.0.0-beta.14",
     "@smui/fab": "^7.0.0-beta.14",
     "@smui/icon-button": "^7.0.0-beta.14",
     "@smui/textfield": "^7.0.0-beta.14",
@@ -27,6 +30,7 @@
     "@vitest/browser": "^0.33.0",
     "@vitest/coverage-istanbul": "^0.33.0",
     "prettier": "^3.0.0",
+    "prettier-plugin-svelte": "^3.0.0",
     "svelte": "^4.0.3",
     "svelte-check": "^3.4.4",
     "tslib": "^2.6.0",
