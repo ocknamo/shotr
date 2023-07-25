@@ -11,6 +11,8 @@
   import { name } from '../package.json';
   import { isValidUrl } from './lib/isValidUrl';
   import { fetchNip5json } from './lib/fetchNip5json';
+  import RedirectingDialog from './lib/component/RedirectingDialog.svelte';
+  import { sleep } from './lib/sleep';
 
   // nip07 types
   interface Window {
@@ -37,6 +39,8 @@
   let disabledInput = false;
   $: showCopyButton =
     !!window.navigator.clipboard.writeText && isValidUrl(result);
+  let redirect = false;
+  let redirectCancel = false;
 
   // result initial value
   let result = '...waiting your input';
@@ -65,9 +69,6 @@
       return;
     }
 
-    result = 'Redirecting...';
-    disabledInput = true;
-
     // parse
     const splitted = hash.replace('#', '').split('/');
     const nameAndNip5 = splitted[0].split('@');
@@ -81,11 +82,16 @@
       throw new Error(result);
     }
 
+    result = 'Redirecting...';
+    redirect = true;
+    disabledInput = true;
+
     // Validation
     // fetch nip5 pub
     const nip5Json = await fetchNip5json(nip5);
     if (!nip5Json || !nip5Json['names']) {
       alert(`NIP-5: ${nip5}\nNIP5 not found. \nNIP-5がありません`);
+      reset();
 
       return;
     }
@@ -95,6 +101,7 @@
       alert(
         `name: ${nip5Name}\nPublic key not found. \n有効な公開鍵がありません`,
       );
+      reset();
 
       return;
     }
@@ -109,10 +116,22 @@
       },
     ]);
 
-    sub.on('event', (event) => {
+    sub.on('event', async (event) => {
       const redirectUrl = event.content;
+      inputUrl = redirectUrl;
 
       console.info(`redirect URL: ${redirectUrl}`);
+
+      // Wait cancel action.
+      await sleep(3000);
+
+      if (redirectCancel) {
+        reset();
+        sub.close();
+        pool.close(relays);
+
+        return;
+      }
       window.location.href = redirectUrl;
       sub.close();
       pool.close(relays);
@@ -140,6 +159,7 @@
     const nip5Json = await fetchNip5json(nip5);
     if (!nip5Json || !nip5Json['names']) {
       alert(`NIP-5: ${nip5}\nNIP5 not found. \nNIP-5がありません`);
+      reset();
 
       return;
     }
@@ -149,6 +169,7 @@
       alert(
         `name: ${nip5Name}\nPublic key not found. \n有効な公開鍵がありません`,
       );
+      reset();
 
       return;
     }
@@ -157,6 +178,7 @@
       alert(
         `name: ${nip5Name}\nThe public key is different from NIP-7.. \n公開鍵がNIP-7と異なります`,
       );
+      reset();
 
       return;
     }
@@ -205,6 +227,14 @@
 
   async function copyUrl() {
     window.navigator.clipboard.writeText(result);
+  }
+
+  function reset() {
+    window.history.pushState('', 'top page', baseUrl);
+    disabledInput = false;
+    redirect = false;
+    redirectCancel = false;
+    result = '...waiting your input';
   }
 </script>
 
@@ -298,6 +328,15 @@
       <img width="50em" src={githubLogo} alt="github" />
     </a>
   </div>
+
+  {#if redirect}
+    <RedirectingDialog
+      bind:canceled={redirectCancel}
+      bind:nip5
+      bind:nip5Name
+      bind:redirectUrl={inputUrl}
+    ></RedirectingDialog>
+  {/if}
 </main>
 
 <style>
