@@ -1,4 +1,4 @@
-import { defaultExclude, defineConfig } from "vitest/config";
+import { defaultExclude, defineConfig } from 'vitest/config';
 
 export default defineConfig({
   optimizeDeps: {
@@ -6,11 +6,11 @@ export default defineConfig({
   },
   resolve: {},
   test: {
-    name: "unit",
-    setupFiles: ["./test/setup.ts"],
+    name: 'unit',
+    setupFiles: ['./test/setup.ts'],
     exclude: [...defaultExclude],
     coverage: {
-      provider: "istanbul",
+      provider: 'istanbul',
     },
   },
 });

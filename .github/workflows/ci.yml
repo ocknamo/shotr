@@ -2,9 +2,9 @@ name: Node.js CI
 
 on:
   push:
-    branches: ["main", "develop", "fix/**", "feature/**", "chore/**"]
+    branches: ['main', 'develop', 'fix/**', 'feature/**', 'chore/**']
   pull_request:
-    branches: ["main"]
+    branches: ['main']
 
 jobs:
   lint-check:
@@ -21,7 +21,7 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
-          cache: "yarn"
+          cache: 'yarn'
       - run: npm install --global yarn
       - run: yarn install --frozen-lockfile
       - run: yarn build
@@ -41,7 +41,7 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
-          cache: "yarn"
+          cache: 'yarn'
       - run: npm install --global yarn
       - run: yarn install --frozen-lockfile
       - run: yarn ci:test

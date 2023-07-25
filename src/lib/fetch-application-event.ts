@@ -1,4 +1,4 @@
-import { type Event, SimplePool } from "nostr-tools";
+import { type Event, SimplePool } from 'nostr-tools';
 
 export interface FetchConfig {
   pool: SimplePool;
@@ -23,7 +23,7 @@ export function fetchApplicationEvent(
   ]);
 
   return new Promise<Event | null>((resolve, reject) => {
-    sub.on("event", (event) => {
+    sub.on('event', (event) => {
       if (!!event) {
         resolve(event);
       }
