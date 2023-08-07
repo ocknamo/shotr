@@ -2,6 +2,7 @@
   import Button from '@smui/button';
   import IconButton from '@smui/icon-button';
   import Textfield from '@smui/textfield';
+  import HelperText from '@smui/textfield/helper-text';
   import Card from '@smui/card';
   import Fab, { Icon, Label } from '@smui/fab';
   import { SimplePool, type Event, type UnsignedEvent } from 'nostr-tools';
@@ -277,7 +278,11 @@
         label="Your NIP-5 domain"
         class="text-input"
         disabled={disabledInput}
-      />
+      >
+        <HelperText persistent slot="helper"
+          >example: "iris.to", "getalby.com"</HelperText
+        >
+      </Textfield>
     </div>
   </div>
 
@@ -289,9 +294,13 @@
         variant="outlined"
         bind:value={nip5Name}
         label="Your NIP-5 'name'"
+        placeholder="hogehoge"
         class="text-input"
         disabled={disabledInput}
-      />
+      >
+        <HelperText persistent slot="helper">example: "ocknamo", "_"</HelperText
+        >
+      </Textfield>
     </div>
   </div>
 
@@ -304,7 +313,11 @@
         label="Input your long url"
         class="text-input"
         disabled={disabledInput}
-      />
+      >
+        <HelperText persistent slot="helper"
+          >example: "https://xxxxxxx"</HelperText
+        >
+      </Textfield>
     </div>
   </div>
 
