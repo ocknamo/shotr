@@ -156,8 +156,8 @@
       return;
     }
     // fetch nip5 pub
-    const nip5Json = await fetchNip5json(nip5);
-    if (!nip5Json || !nip5Json['names']) {
+    const nip5Json = await fetchNip5json(nip5, nip5Name);
+    if (!nip5Json || !nip5Json['names'] || !nip5Json['names'][nip5Name]) {
       alert(`NIP-5: ${nip5}\nNIP5 not found. \nNIP-5がありません`);
       reset();
 
