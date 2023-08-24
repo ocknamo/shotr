@@ -19,7 +19,10 @@ jobs:
           go-version: '1.15'
       - run: curl https://get.volta.sh | bash
       - run: ls -a ~/
+      - run: cat ~/.bash_profile
+      - run: cat ~/.bashrc
       - run: source ~/.bashrc
+      - run: source ~/.bash_profile
       - run: volta install node@20
       - run: npm install --global yarn
       - run: go install github.com/studiokaiji/nostr-webhost/nostrh@latest
