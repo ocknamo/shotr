@@ -18,8 +18,6 @@ jobs:
         with:
           go-version: '1.21'
       - run: node -v
-      - run: ls ~/.nvm
-      - run: ~/.nvm/nvm.sh install 20
       - run: npm install --global yarn
       - run: export GO111MODULE=on
       - run: go install github.com/studiokaiji/nostr-webhost/nostrh@latest
