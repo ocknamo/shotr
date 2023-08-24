@@ -19,6 +19,7 @@ jobs:
           go-version: '1.15'
       - run: node -v
       - run: npm install --global yarn
+      - run: export GO111MODULE=on
       - run: go install github.com/studiokaiji/nostr-webhost/nostrh@latest
       - run: yarn install --frozen-lockfile
       - run: yarn build
