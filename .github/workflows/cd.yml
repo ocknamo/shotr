@@ -7,23 +7,19 @@ on:
     branches: ['develop']
 
 jobs:
-  build:
+  build-and-deploy:
 
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
 
-      - name: Set up Go
+      - name: CD
         uses: actions/setup-go@v3
         with:
           go-version: '1.15'
-
-      - name: Setup Nodejs
       - run: curl https://get.volta.sh | bash
       - run: volta install node@20
       - run: npm install --global yarn
-
-      - name: CD
       - run: go install github.com/studiokaiji/nostr-webhost/nostrh@latest
       - run: yarn install --frozen-lockfile
       - run: yarn build
@@ -32,4 +28,3 @@ jobs:
       - run: pwd
       - run: ls
       - run: nostrh deploy /dist
-      
