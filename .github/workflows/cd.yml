@@ -27,4 +27,5 @@ jobs:
       - run: nostrh add-relay wss://r.hostr.cc
       - run: pwd
       - run: ls
-      - run: nostrh deploy -p /dist
+      - run: ls ./dist
+      - run: nostrh deploy -p ./dist
