@@ -388,6 +388,10 @@
     color: rgba(0, 0, 0, 0.5);
     display: flex;
     justify-content: center;
+
+    @media screen and (max-height: 740px) {
+      margin: 3em;
+    }
   }
   .input-flex-container {
     display: flex;
