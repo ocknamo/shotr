@@ -34,6 +34,7 @@
   let nip5: string | null = null;
   let nip5Name: string | null = null;
   let inputUrl: string | null = null;
+  let isMobile = false;
 
   // interaction state
   $: disabled = !nip5 || !nip5Name || !inputUrl;
@@ -59,6 +60,7 @@
   ];
 
   onMount(async () => {
+    isMobile = document.body.clientWidth <= 1024;
     const hash = window.location.hash;
     console.info(hash);
     if (!hash) {
@@ -328,6 +330,15 @@
     NIP-5:{nip5 ?? ' ???'}
   </p>
   <div class="footer">
+    {#if isMobile}
+      <a
+        href="lnurlp://s14pes@getalby.com"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        <p>Tip</p>
+      </a>
+    {/if}
     <a
       href="https://github.com/ocknamo/shotr/issues"
       target="_blank"
