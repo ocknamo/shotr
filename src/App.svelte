@@ -326,7 +326,7 @@
   <Button style="margin:8px;" variant="raised" on:click={onclick} {disabled}
     >Submit</Button
   >
-  <p>
+  <p class="nip-05">
     NIP-5:{nip5 ?? ' ???'}
   </p>
   <div class="footer">
@@ -339,17 +339,19 @@
         <p>Tip</p>
       </a>
     {/if}
-    <a
-      href="https://github.com/ocknamo/shotr/issues"
-      target="_blank"
-      rel="noopener noreferrer"><p>Report</p></a
-    >
+    {#if !isMobile}
+      <a
+        href="https://github.com/ocknamo/shotr/issues"
+        target="_blank"
+        rel="noopener noreferrer"><p>Report</p></a
+      >
+    {/if}
     <a
       href="https://github.com/ocknamo/shotr"
       target="_blank"
       rel="noopener noreferrer"
     >
-      <img width="50em" src={githubLogo} alt="github" />
+      <img class="github-link" width="50em" src={githubLogo} alt="github" />
     </a>
   </div>
 
@@ -403,7 +405,10 @@
   .text-input-container {
     margin: 0.5em;
     max-width: fit-content;
-    min-width: 200px;
+    min-width: 300px;
+  }
+  .nip-05 {
+    color: black;
   }
   .footer {
     position: absolute;
@@ -413,8 +418,21 @@
     justify-content: end;
     vertical-align: bottom;
     width: 100%;
+    align-items: center;
+
+    @media screen and (max-height: 700px) {
+      bottom: 0.2em;
+      right: 0.5em;
+      margin-bottom: -10px;
+    }
   }
   .footer a {
     margin-left: 1em;
+  }
+  .github-link {
+    width: 40px;
+    @media screen and (max-height: 700px) {
+      width: 20px;
+    }
   }
 </style>
