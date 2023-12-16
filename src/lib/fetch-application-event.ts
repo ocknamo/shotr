@@ -27,7 +27,7 @@ export function fetchApplicationEvent(
       if (!!event) {
         resolve(event);
       }
-      sub.close();
+      sub.unsub();
     });
 
     setTimeout(() => {
