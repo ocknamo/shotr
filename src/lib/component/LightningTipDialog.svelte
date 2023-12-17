@@ -8,7 +8,7 @@
   export let nip5: string | null = null;
   export let lightningAddressUrl: string | null = null;
 
-  const lightningAddress = lightningAddressUrl
+  $: lightningAddress = lightningAddressUrl
     ? lightningAddressUrl.replace('lnurlp://', '')
     : '';
 </script>
@@ -21,13 +21,15 @@
   aria-describedby="Which URLs to redirect to. Information about who created the URL."
 >
   <Content id="redirect-to">
-    <!-- XXXX: Depending on the environment, 'lnurlp://' could not be used. -->
+    <!-- XXXX: Depending on the environment, 'lnurlp://' could not be used. Fix me if you can. e.g. Pixel 6 -->
     <QrCode value={'lightning://' + lightningAddress}></QrCode>
 
     <p class="redirect-url">
       <span style="font-weight: 600">Tip to: </span>{lightningAddress ?? '???'}
     </p>
-    <span style="font-weight: 600">Who made this? :</span>
+    <span style="font-weight: 600">Who made this link? :</span>
+    <br />
+    →
     <a
       href={`https://nostter.app/${nip5Name}@${nip5}`}
       target="_blank"
