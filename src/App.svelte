@@ -13,7 +13,9 @@
   import { isValidUrl } from './lib/isValidUrl';
   import { fetchNip5json } from './lib/fetchNip5json';
   import RedirectingDialog from './lib/component/RedirectingDialog.svelte';
+  import LightningTipDialog from './lib/component/LightningTipDialog.svelte';
   import { sleep } from './lib/sleep';
+  import { isValidLnAddress } from './lib/is-valid-lnaddress';
 
   // nip07 types
   interface Window {
@@ -34,6 +36,10 @@
   let nip5: string | null = null;
   let nip5Name: string | null = null;
   let inputUrl: string | null = null;
+
+  // flags
+  let isMobile = false;
+  let isLnMode = false;
 
   // interaction state
   $: disabled = !nip5 || !nip5Name || !inputUrl;
@@ -59,6 +65,9 @@
   ];
 
   onMount(async () => {
+    isMobile = document.body.clientWidth <= 1024;
+    isLnMode = location.pathname === '/ln';
+
     const hash = window.location.hash;
     console.info(hash);
     if (!hash) {
@@ -89,7 +98,7 @@
 
     // Validation
     // fetch nip5 pub
-    const nip5Json = await fetchNip5json(nip5);
+    const nip5Json = await fetchNip5json(nip5, nip5Name);
     if (!nip5Json || !nip5Json['names']) {
       alert(`NIP-5: ${nip5}\nNIP5 not found. \nNIP-5がありません`);
       reset();
@@ -123,18 +132,23 @@
 
       console.info(`redirect URL: ${redirectUrl}`);
 
+      if (isLnMode) {
+        // Noop
+        return;
+      }
+
       // Wait cancel action.
       await sleep(3000);
 
       if (redirectCancel) {
         reset();
-        sub.close();
+        sub.unsub();
         pool.close(relays);
 
         return;
       }
       window.location.href = redirectUrl;
-      sub.close();
+      sub.unsub();
       pool.close(relays);
     });
   });
@@ -156,6 +170,11 @@
     if (!nip5 || !nip5Name || !inputUrl) {
       return;
     }
+    if (isLnMode && !isValidLnAddress(inputUrl)) {
+      alert(`Invalid lightning addredd. \n不正なライトニングアドレスです`);
+      return;
+    }
+
     // fetch nip5 pub
     const nip5Json = await fetchNip5json(nip5, nip5Name);
     if (!nip5Json || !nip5Json['names'] || !nip5Json['names'][nip5Name]) {
@@ -206,7 +225,7 @@
         [tagKey, contentId],
         [dTag, appName],
       ],
-      content: inputUrl!,
+      content: isLnMode ? `lnurlp://${inputUrl}` : inputUrl,
       pubkey: pk ?? '',
     };
 
@@ -214,7 +233,9 @@
     pool.publish(relays, event!);
 
     // TODO: Convert safety NIP-05 name and nip5 domain. eg. `/`, `@` value are not safety.
-    result = `${baseUrl}#${nip5Name}@${nip5}/${tagKey}/${contentId}`;
+    result = `${baseUrl}${
+      isLnMode ? '/ln' : ''
+    }#${nip5Name}@${nip5}/${tagKey}/${contentId}`;
 
     // cooling time
     setTimeout(() => {
@@ -223,7 +244,7 @@
   }
 
   function clickTitle() {
-    window.location.href = baseUrl;
+    window.location.href = isLnMode ? baseUrl : `${baseUrl}/ln`;
   }
 
   async function copyUrl() {
@@ -249,11 +270,25 @@
 />
 <main>
   <div class="head-space" />
-  <Fab extended class="fab-title" on:click={clickTitle}>
-    <Icon class="material-icons" style="margin-right: 4px;">link</Icon>
+  <Fab
+    extended
+    style={isLnMode ? 'background-color:orange' : ''}
+    class="fab-title"
+    on:click={clickTitle}
+  >
+    <Icon class="material-icons" style="margin-right: 4px;"
+      >{isLnMode ? 'bolt' : 'link'}</Icon
+    >
     <Label>{appName}</Label>
   </Fab>
-  <p class="app-description">Shorted URL generator by NIP-05</p>
+  <div>
+    <Icon class="material-icons" style="color:gray;"
+      >{isLnMode ? 'toggle_on' : 'toggle_off'}</Icon
+    >
+  </div>
+  <p class="app-description">
+    {isLnMode ? '[BETA] Generate Lightning Tip link' : 'Shorted URL generator'}
+  </p>
   <div class="top-space" />
   <div class="input-flex-container">
     <div class="card-container">
@@ -310,12 +345,14 @@
         type="text"
         variant="outlined"
         bind:value={inputUrl}
-        label="Input your long url"
+        label={isLnMode
+          ? '⚡Input your Lightning address!'
+          : 'Input your long url'}
         class="text-input"
         disabled={disabledInput}
       >
         <HelperText persistent slot="helper"
-          >example: "https://xxxxxxx"</HelperText
+          >example: "jhondoe@ocknamo.com"</HelperText
         >
       </Textfield>
     </div>
@@ -324,40 +361,58 @@
   <Button style="margin:8px;" variant="raised" on:click={onclick} {disabled}
     >Submit</Button
   >
-  <p>
+  <p class="nip-05">
     NIP-5:{nip5 ?? ' ???'}
   </p>
   <div class="footer">
-    <a
-      href="https://github.com/ocknamo/shotr/issues"
-      target="_blank"
-      rel="noopener noreferrer"><p>Report</p></a
-    >
+    {#if isMobile}
+      <a
+        href="lnurlp://s14pes@getalby.com"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        <p>Tip</p>
+      </a>
+    {/if}
+    {#if !isMobile}
+      <a
+        href="https://github.com/ocknamo/shotr/issues"
+        target="_blank"
+        rel="noopener noreferrer"><p>Report</p></a
+      >
+    {/if}
     <a
       href="https://github.com/ocknamo/shotr"
       target="_blank"
       rel="noopener noreferrer"
     >
-      <img width="50em" src={githubLogo} alt="github" />
+      <img class="github-link" width="50em" src={githubLogo} alt="github" />
     </a>
   </div>
 
-  {#if redirect}
+  {#if redirect && !isLnMode}
     <RedirectingDialog
       bind:canceled={redirectCancel}
       bind:nip5
       bind:nip5Name
       bind:redirectUrl={inputUrl}
     ></RedirectingDialog>
+  {:else if redirect && isLnMode}
+    <LightningTipDialog
+      bind:canceled={redirectCancel}
+      bind:nip5
+      bind:nip5Name
+      bind:lightningAddressUrl={inputUrl}
+    ></LightningTipDialog>
   {/if}
 </main>
 
 <style>
   .head-space {
-    margin-top: 6em;
+    margin-top: 4em;
   }
   .top-space {
-    margin-top: 4em;
+    margin-top: 3em;
   }
   @media screen and (max-height: 740px) {
     .top-space {
@@ -368,7 +423,7 @@
     }
   }
   .card-container {
-    margin: 4em;
+    margin: 3em;
     width: 100%;
     min-width: 200px;
     max-width: 300px;
@@ -376,6 +431,12 @@
     display: flex;
     justify-content: center;
   }
+  @media screen and (max-height: 740px) {
+    .card-container {
+      margin: 3em;
+    }
+  }
+
   .input-flex-container {
     display: flex;
     justify-content: center;
@@ -392,7 +453,10 @@
   .text-input-container {
     margin: 0.5em;
     max-width: fit-content;
-    min-width: 200px;
+    min-width: 300px;
+  }
+  .nip-05 {
+    color: black;
   }
   .footer {
     position: absolute;
@@ -402,8 +466,24 @@
     justify-content: end;
     vertical-align: bottom;
     width: 100%;
+    align-items: center;
+  }
+  @media screen and (max-height: 700px) {
+    .footer {
+      bottom: 0.2em;
+      right: 0.5em;
+      margin-bottom: -10px;
+    }
   }
   .footer a {
     margin-left: 1em;
+  }
+  .github-link {
+    width: 40px;
+  }
+  @media screen and (max-height: 700px) {
+    .github-link {
+      width: 20px;
+    }
   }
 </style>

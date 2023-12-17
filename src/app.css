@@ -27,6 +27,7 @@ body {
   margin: 0;
   display: flex;
   place-items: center;
+  overflow-y: hidden;
 }
 
 input {
@@ -37,7 +38,6 @@ input {
 #app {
   width: 100%;
   margin: 0 auto;
-  padding: 2rem 0;
   text-align: center;
 }
 
@@ -52,6 +52,7 @@ input {
 
 .text-input {
   background-color: azure;
+  width: 100%;
 }
 
 .fab-title {
